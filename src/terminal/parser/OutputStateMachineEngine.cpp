@@ -707,8 +707,7 @@ bool OutputStateMachineEngine::ActionCsiDispatch(const VTID id, const VTParamete
 // Return Value:
 // - the data string handler function or nullptr if the sequence is not supported
 IStateMachineEngine::StringHandler OutputStateMachineEngine::ActionDcsDispatch(const VTID id, const VTParameters parameters)
-{
-    StringHandler handler = nullptr;
+{    StringHandler handler = nullptr;
 
     switch (id)
     {
@@ -937,6 +936,20 @@ bool OutputStateMachineEngine::ActionSs3Dispatch(const wchar_t /*wch*/, const VT
     _dispatch->UnknownSequence();
     _ClearLastChar();
     return true;
+}
+
+// Routine Description:
+// - Triggers an APC (Application Program Command, "ESC _ ... ESC \\") sequence.
+//   The only APC use this engine understands is the Kitty Graphics Protocol
+//   ("ESC _ G ..."), so we simply hand off to the dispatch, which is
+//   responsible for checking whether that capability is enabled at all and,
+//   if so, for confirming the sequence is really Kitty graphics once the
+//   first character of the string arrives.
+// Return Value:
+// - the data string handler function or nullptr if APC sequences are not supported
+IStateMachineEngine::StringHandler OutputStateMachineEngine::ActionApcDispatch()
+{
+    return _dispatch->DefineKittyGraphics();
 }
 
 // Routine Description:

@@ -5,6 +5,7 @@
 
 #include "adaptDispatch.hpp"
 #include "SixelParser.hpp"
+#include "KittyGraphicsParser.hpp"
 #include "../../inc/unicode.hpp"
 #include "../../renderer/base/renderer.hpp"
 #include "../../types/inc/CodepointWidthDetector.hpp"
@@ -3930,6 +3931,30 @@ ITermDispatch::StringHandler AdaptDispatch::DefineSixelImage(const VTInt macroPa
 }
 
 // Method Description:
+// - Kitty Graphics Protocol - handles one complete APC "ESC _ G ..." sequence:
+//   transmission, direct placement, Unicode Placeholder virtual-placement
+//   grid registration, and deletion. Disabled by default; only functions
+//   when experimental.enableKittyGraphicsProtocol is set for this session.
+// Return Value:
+// - a function to receive the sequence's content, or nullptr if the
+//   capability is disabled (in which case the content is silently ignored,
+//   exactly as any other unrecognized APC sequence always has been)
+ITermDispatch::StringHandler AdaptDispatch::DefineKittyGraphics()
+{
+    if (!_api.IsKittyGraphicsProtocolEnabled())
+    {
+        return nullptr;
+    }
+    // The Kitty graphics parser is created on demand.
+    if (!_kittyGraphicsParser)
+    {
+        _kittyGraphicsParser = std::make_unique<KittyGraphicsParser>(*this, _api.GetStateMachine());
+    }
+    return _kittyGraphicsParser->BeginSequence();
+}
+
+
+// Method Description:
 // - DECDLD - Downloads one or more characters of a dynamically redefinable
 //   character set (DRCS) with a specified pixel pattern. The pixel array is
 //   transmitted in sixel format via the returned StringHandler function.
@@ -4874,6 +4899,13 @@ void AdaptDispatch::_ReturnOscResponse(const std::wstring_view response) const
     const auto osc = _terminalInput.GetInputMode(TerminalInput::Mode::SendC1) ? L"\x9D" : L"\x1B]";
     const auto st = _terminalInput.GetInputMode(TerminalInput::Mode::SendC1) ? L"\x9C" : L"\x1B\\";
     _api.ReturnResponse(fmt::format(FMT_COMPILE(L"{}{}{}"), osc, response, st));
+}
+
+void AdaptDispatch::_ReturnApcResponse(const std::wstring_view response) const
+{
+    const auto apc = _terminalInput.GetInputMode(TerminalInput::Mode::SendC1) ? L"\x9F" : L"\x1B_";
+    const auto st = _terminalInput.GetInputMode(TerminalInput::Mode::SendC1) ? L"\x9C" : L"\x1B\\";
+    _api.ReturnResponse(fmt::format(FMT_COMPILE(L"{}{}{}"), apc, response, st));
 }
 
 // Routine Description:

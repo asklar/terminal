@@ -552,6 +552,15 @@ IStateMachineEngine::StringHandler InputStateMachineEngine::ActionDcsDispatch(co
 }
 
 // Routine Description:
+// - The input engine has no use for APC sequences.
+// Return Value:
+// - nullptr, so the sequence's content is ignored.
+IStateMachineEngine::StringHandler InputStateMachineEngine::ActionApcDispatch() noexcept
+{
+    return nullptr;
+}
+
+// Routine Description:
 // - Triggers the Ss3Dispatch action to indicate that the listener should handle
 //      a control sequence. These sequences perform various API-type commands
 //      that can include many parameters.

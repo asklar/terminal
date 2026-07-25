@@ -721,6 +721,30 @@ class ReflowTests
             _compareTextBufferAgainstTestBuffer(*textBuffer, testBuffer);
         }
     }
+
+    TEST_METHOD(KittyImageStorageSurvivesReflow)
+    {
+        // Reflow() constructs a brand new TextBuffer and moves row content
+        // across; the Kitty Graphics Protocol's decoded-image store isn't
+        // part of any one row, so it must be explicitly carried over too,
+        // or a window resize would silently orphan every transmitted image
+        // (this is the specific scenario Tier 2 -- Unicode Placeholder --
+        // depends on surviving).
+        auto originalBuffer = std::make_unique<TextBuffer>(til::size{ 10, 5 }, TextAttribute{ 0x7 }, 0, false, &renderer);
+
+        std::vector<RGBQUAD> pixels(4, RGBQUAD{ 10, 20, 30, 255 });
+        originalBuffer->GetKittyImageStorage().Store(42, til::size{ 2, 2 }, pixels);
+        originalBuffer->GetKittyImageStorage().SetVirtualPlacementGrid(42, til::size{ 3, 3 });
+
+        auto newBuffer = std::make_unique<TextBuffer>(til::size{ 20, 5 }, TextAttribute{ 0x7 }, 0, false, &renderer);
+        TextBuffer::Reflow(*originalBuffer, *newBuffer);
+
+        auto& storage = newBuffer->GetKittyImageStorage();
+        const auto image = storage.Find(42);
+        VERIFY_IS_TRUE(static_cast<bool>(image));
+        VERIFY_ARE_EQUAL(til::size(2, 2), image->pixelSize);
+        VERIFY_ARE_EQUAL(til::size(3, 3), storage.GetVirtualPlacementGrid(42));
+    }
 };
 
 DummyRenderer ReflowTests::renderer{};

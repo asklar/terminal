@@ -52,6 +52,7 @@ filling in the last row, and updating the screen.
 #include "cursor.h"
 #include "Row.hpp"
 #include "TextAttribute.hpp"
+#include "KittyImageStorage.hpp"
 #include "../types/inc/Viewport.hpp"
 
 #include "../buffer/out/textBufferCellIterator.hpp"
@@ -89,6 +90,12 @@ public:
     ROW& GetScratchpadRow(const TextAttribute& attributes);
     const ROW& GetRowByOffset(til::CoordType index) const;
     ROW& GetMutableRowByOffset(til::CoordType index);
+
+    // The Kitty Graphics Protocol image store is scoped to the text buffer:
+    // both the VT adapter (which populates it as images are transmitted)
+    // and the renderer (which resolves Unicode Placeholder cells against it
+    // at paint time) reach the same TextBuffer instance.
+    KittyImageStorage& GetKittyImageStorage();
 
     TextBufferCellIterator GetCellDataAt(const til::point at) const;
     TextBufferCellIterator GetCellLineDataAt(const til::point at) const;
@@ -410,6 +417,11 @@ private:
 
     Cursor _cursor;
     bool _isActiveBuffer = false;
+
+    // Backing store for KittyImageStorage& GetKittyImageStorage(); lazily
+    // allocated since the overwhelming majority of sessions never use the
+    // Kitty Graphics Protocol.
+    std::unique_ptr<KittyImageStorage> _kittyImageStorage;
 
 #ifdef UNIT_TESTING
     friend class TextBufferTests;

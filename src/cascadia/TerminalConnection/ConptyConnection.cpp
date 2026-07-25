@@ -63,6 +63,15 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
             // The profile Guid does include the enclosing '{}'
             environment.as_map().insert_or_assign(L"WT_PROFILE_ID", Utils::GuidToString(_profileGuid));
 
+            // Signal Kitty Graphics Protocol support additively, alongside (never
+            // instead of) WT_SESSION -- see doc/specs/Kitty Graphics Protocol Support.md.
+            // Only set when the capability is actually enabled for this profile, so
+            // clients that check for it don't get a false positive.
+            if (_enableKittyGraphicsProtocol)
+            {
+                environment.as_map().insert_or_assign(L"WT_KITTY_SUPPORTED", std::wstring{ L"true" });
+            }
+
             // WSLENV is a colon-delimited list of environment variables (+flags) that should appear inside WSL
             // https://devblogs.microsoft.com/commandline/share-environment-vars-between-wsl-and-windows/
 
@@ -212,7 +221,8 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
                                                                                 uint32_t rows,
                                                                                 uint32_t columns,
                                                                                 const winrt::guid& guid,
-                                                                                const winrt::guid& profileGuid)
+                                                                                const winrt::guid& profileGuid,
+                                                                                bool enableKittyGraphicsProtocol)
     {
         Windows::Foundation::Collections::ValueSet vs{};
 
@@ -224,6 +234,7 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
         vs.Insert(L"initialCols", Windows::Foundation::PropertyValue::CreateUInt32(columns));
         vs.Insert(L"guid", Windows::Foundation::PropertyValue::CreateGuid(guid));
         vs.Insert(L"profileGuid", Windows::Foundation::PropertyValue::CreateGuid(profileGuid));
+        vs.Insert(L"enableKittyGraphicsProtocol", Windows::Foundation::PropertyValue::CreateBoolean(enableKittyGraphicsProtocol));
 
         if (environmentOverrides)
         {
@@ -258,6 +269,7 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
             _sessionId = unbox_prop_or<winrt::guid>(settings, L"sessionId", _sessionId);
             _environment = settings.TryLookup(L"environment").try_as<Windows::Foundation::Collections::ValueSet>();
             _profileGuid = unbox_prop_or<winrt::guid>(settings, L"profileGuid", _profileGuid);
+            _enableKittyGraphicsProtocol = unbox_prop_or<bool>(settings, L"enableKittyGraphicsProtocol", false);
 
             _flags = 0;
 

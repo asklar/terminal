@@ -6,6 +6,8 @@
 
 #include <til/atomic.h>
 
+#include "../../buffer/out/KittyPlaceholder.hpp"
+
 using namespace Microsoft::Console::Render;
 using namespace Microsoft::Console::Types;
 
@@ -1101,6 +1103,14 @@ void Renderer::_PaintBufferOutput(_In_ IRenderEngine* const pEngine)
 
             // Ask the helper to paint through this specific line.
             _PaintBufferOutputHelper(pEngine, it, screenPosition);
+
+            // If this row contains any Kitty Graphics Protocol Unicode
+            // Placeholder cells, (re)synchronize its ImageSlice from the
+            // referenced image(s) before painting, so placements that were
+            // written as ordinary text (and therefore already rode through
+            // scroll/reflow for free) get their pixels blitted via the same
+            // path Sixel already uses.
+            KittyPlaceholder::SynchronizeRowImageSlice(buffer.GetMutableRowByOffset(row), buffer.GetKittyImageStorage(), _pData->GetFontInfo().GetSize());
 
             // Paint any image content on top of the text.
             const auto imageSlice = buffer.GetRowByOffset(row).GetImageSlice();

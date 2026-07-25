@@ -50,7 +50,8 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
                                                                          uint32_t rows,
                                                                          uint32_t columns,
                                                                          const winrt::guid& guid,
-                                                                         const winrt::guid& profileGuid);
+                                                                         const winrt::guid& profileGuid,
+                                                                         bool enableKittyGraphicsProtocol);
 
         til::event<TerminalOutputHandler> TerminalOutput;
 
@@ -92,6 +93,7 @@ namespace winrt::Microsoft::Terminal::TerminalConnection::implementation
 
         til::env _initialEnv{};
         guid _profileGuid{};
+        bool _enableKittyGraphicsProtocol{ false };
 
         struct StartupInfoFromDefTerm
         {

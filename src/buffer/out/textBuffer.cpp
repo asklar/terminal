@@ -3,6 +3,7 @@
 
 #include "precomp.h"
 #include "textBuffer.hpp"
+#include "KittyPlaceholder.hpp"
 
 #include <til/hash.h>
 
@@ -243,6 +244,15 @@ ROW& TextBuffer::GetMutableRowByOffset(const til::CoordType index)
 {
     _lastMutationId++;
     return _getRow(index);
+}
+
+KittyImageStorage& TextBuffer::GetKittyImageStorage()
+{
+    if (!_kittyImageStorage)
+    {
+        _kittyImageStorage = std::make_unique<KittyImageStorage>();
+    }
+    return *_kittyImageStorage;
 }
 
 // Returns a row filled with whitespace and the current attributes, for you to freely use.
@@ -1898,8 +1908,13 @@ std::wstring TextBuffer::GetPlainText(const CopyRequest& req) const
         const auto& row = GetRowByOffset(iRow);
         const auto& [rowBeg, rowEnd, addLineBreak] = _RowCopyHelper(req, iRow, row);
 
-        // save selected text (exclusive end)
-        selectedText += row.GetText(rowBeg, rowEnd);
+        // save selected text (exclusive end). Kitty Graphics Protocol
+        // Unicode Placeholder sequences (an image placeholder code point
+        // plus positioning diacritics) carry no meaningful textual content,
+        // so they're stripped out here -- this keeps them out of both
+        // screen reader/UIA text extraction and clipboard copies, which
+        // both funnel through this method.
+        selectedText += KittyPlaceholder::StripPlaceholders(row.GetText(rowBeg, rowEnd));
 
         if (addLineBreak && iRow != req.end.y)
         {
@@ -2949,6 +2964,14 @@ void TextBuffer::Reflow(TextBuffer& oldBuffer, TextBuffer& newBuffer, const View
 
     newBuffer.CopyProperties(oldBuffer);
     newBuffer.CopyHyperlinkMaps(oldBuffer);
+
+    // The Kitty Graphics Protocol image store isn't part of any single row,
+    // so it doesn't get carried over by the row-by-row copying above. Move
+    // it across explicitly, or a resize would silently lose all previously
+    // transmitted image data (and, via GetKittyImageStorage(), an empty
+    // store would replace it with a fresh one, orphaning any placement text
+    // still present in the reflowed rows).
+    newBuffer._kittyImageStorage = std::move(oldBuffer._kittyImageStorage);
 
     assert(newCursorPos.x >= 0 && newCursorPos.x < newWidth);
     assert(newCursorPos.y >= 0 && newCursorPos.y < newHeight);

@@ -436,6 +436,18 @@ bool ConhostInternalGetSet::IsVtInputEnabled() const
     return _io.GetActiveInputBuffer()->IsInVirtualTerminalInputMode();
 }
 
+bool ConhostInternalGetSet::IsKittyGraphicsProtocolEnabled() const noexcept
+{
+    // The classic console window does not support the Kitty Graphics Protocol;
+    // only Windows Terminal's own renderer does.
+    return false;
+}
+
+til::size ConhostInternalGetSet::GetFontCellSize() const
+{
+    return _io.GetActiveOutputBuffer().GetScreenFontSize();
+}
+
 // Routine Description:
 // - Implements conhost-specific behavior when the buffer is rotated.
 // Arguments:

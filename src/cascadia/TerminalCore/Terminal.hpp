@@ -158,6 +158,8 @@ public:
     void UseMainScreenBuffer() override;
 
     bool IsVtInputEnabled() const noexcept override;
+    bool IsKittyGraphicsProtocolEnabled() const noexcept override;
+    til::size GetFontCellSize() const override;
     void NotifyBufferRotation(const int delta) override;
     void NotifyShellIntegrationMark() override;
 
@@ -413,6 +415,7 @@ private:
     Microsoft::Console::Types::Viewport _mutableViewport;
     til::CoordType _scrollbackLines = 0;
     bool _detectURLs = false;
+    bool _enableKittyGraphicsProtocol = false;
     bool _clipboardOperationsAllowed = true;
 
     til::size _altBufferSize;

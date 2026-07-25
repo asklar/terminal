@@ -14,6 +14,7 @@
     <ClCompile Include="..\adaptDispatch.cpp" />
     <ClCompile Include="..\FontBuffer.cpp" />
     <ClCompile Include="..\InteractDispatch.cpp" />
+    <ClCompile Include="..\KittyGraphicsParser.cpp" />
     <ClCompile Include="..\MacroBuffer.cpp" />
     <ClCompile Include="..\PageManager.cpp" />
     <ClCompile Include="..\SixelParser.cpp" />
@@ -30,6 +31,7 @@
     <ClInclude Include="..\FontBuffer.hpp" />
     <ClInclude Include="..\InteractDispatch.hpp" />
     <ClInclude Include="..\ITerminalApi.hpp" />
+    <ClInclude Include="..\KittyGraphicsParser.hpp" />
     <ClInclude Include="..\MacroBuffer.hpp" />
     <ClInclude Include="..\PageManager.hpp" />
     <ClInclude Include="..\SixelParser.hpp" />

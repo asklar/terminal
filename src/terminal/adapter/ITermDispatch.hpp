@@ -169,6 +169,13 @@ public:
                                            const DispatchTypes::SixelBackground backgroundSelect,
                                            const VTParameter backgroundColor) = 0; // SIXEL
 
+    // Kitty Graphics Protocol (APC "ESC _ G ... ESC \\"). A single call
+    // handles one complete APC sequence: transmission (t=d only), direct
+    // placement, Unicode Placeholder virtual-placement registration, and
+    // deletion, per the `a=` action key. Returns nullptr if the capability
+    // is disabled or the string doesn't turn out to be Kitty graphics.
+    virtual StringHandler DefineKittyGraphics() = 0;
+
     virtual StringHandler DownloadDRCS(const VTInt fontNumber,
                                        const VTParameter startChar,
                                        const DispatchTypes::DrcsEraseControl eraseControl,

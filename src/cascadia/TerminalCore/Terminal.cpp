@@ -144,6 +144,7 @@ void Terminal::UpdateSettings(ICoreSettings settings)
     {
         // Clear the patterns first
         _detectURLs = settings.DetectURLs();
+        _enableKittyGraphicsProtocol = settings.EnableKittyGraphicsProtocol();
         _updateUrlDetection();
     }
 }

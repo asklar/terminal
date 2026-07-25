@@ -384,6 +384,7 @@ namespace winrt::Microsoft::Terminal::Settings
         _TrimBlockSelection = globalSettings.TrimBlockSelection();
         _DetectURLs = globalSettings.DetectURLs();
         _EnableUnfocusedAcrylic = globalSettings.EnableUnfocusedAcrylic();
+        _EnableKittyGraphicsProtocol = globalSettings.EnableKittyGraphicsProtocol();
     }
 
     // Method Description:

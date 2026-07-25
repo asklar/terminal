@@ -1580,7 +1580,8 @@ namespace winrt::TerminalApp::implementation
                                                                             settings.InitialRows(),
                                                                             settings.InitialCols(),
                                                                             winrt::guid(),
-                                                                            profile.Guid());
+                                                                            profile.Guid(),
+                                                                            false);
         }
 
         else
@@ -1614,7 +1615,8 @@ namespace winrt::TerminalApp::implementation
                                                                             settings.InitialRows(),
                                                                             settings.InitialCols(),
                                                                             winrt::guid(),
-                                                                            profile.Guid());
+                                                                            profile.Guid(),
+                                                                            settings.EnableKittyGraphicsProtocol());
 
             if (inheritCursor)
             {

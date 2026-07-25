@@ -42,6 +42,9 @@
     <ClCompile Include="..\SixelParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\KittyGraphicsParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\adaptDispatch.hpp">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\SixelParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\KittyGraphicsParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

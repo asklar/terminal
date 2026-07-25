@@ -35,6 +35,7 @@ namespace Microsoft.Terminal.TerminalConnection
                                                                       UInt32 rows,
                                                                       UInt32 columns,
                                                                       Guid guid,
-                                                                      Guid profileGuid);
+                                                                      Guid profileGuid,
+                                                                      Boolean enableKittyGraphicsProtocol);
     };
 }

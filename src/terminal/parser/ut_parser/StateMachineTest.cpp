@@ -116,6 +116,13 @@ public:
         return [=](const auto ch) { dcsDataString += ch; return true; };
     }
 
+    IStateMachineEngine::StringHandler ActionApcDispatch() override
+    {
+        // Not exercised by these state-machine-focused tests; Kitty Graphics
+        // Protocol parsing itself is covered by the adapter's own unit tests.
+        return nullptr;
+    }
+
     // These will only be populated if ActionCsiDispatch is called.
     uint64_t csiId = 0;
     std::vector<size_t> csiParams;

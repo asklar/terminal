@@ -54,6 +54,16 @@ namespace Microsoft::Console::VirtualTerminal
 
         virtual bool IsVtInputEnabled() const = 0;
 
+        // Whether the Kitty Graphics Protocol (transmission, direct placement, and
+        // Unicode Placeholder placement) is enabled for this session. This is an
+        // opt-in, default-off capability (see experimental.enableKittyGraphicsProtocol).
+        virtual bool IsKittyGraphicsProtocolEnabled() const noexcept = 0;
+
+        // The current font's cell size, in pixels. Used by the Kitty
+        // Graphics Protocol to determine how many terminal columns/rows a
+        // direct-placed image (sized only in pixels) should occupy.
+        virtual til::size GetFontCellSize() const = 0;
+
         enum class Mode : size_t
         {
             AutoWrap,

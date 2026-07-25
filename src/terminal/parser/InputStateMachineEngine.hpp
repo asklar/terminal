@@ -190,6 +190,8 @@ namespace Microsoft::Console::VirtualTerminal
 
         bool ActionSs3Dispatch(const wchar_t wch, const VTParameters parameters) override;
 
+        StringHandler ActionApcDispatch() noexcept override;
+
     private:
         const std::unique_ptr<IInteractDispatch> _pDispatch;
         std::atomic<uint64_t> _deviceAttributes{ 0 };

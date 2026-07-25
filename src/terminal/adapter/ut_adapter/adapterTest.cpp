@@ -106,6 +106,19 @@ public:
         return false;
     }
 
+    bool IsKittyGraphicsProtocolEnabled() const noexcept override
+    {
+        // Test double: report enabled so adapter unit tests can exercise the
+        // Kitty Graphics Protocol dispatch path without needing real settings plumbing.
+        return true;
+    }
+
+    til::size GetFontCellSize() const override
+    {
+        // A reasonable, fixed nominal cell size for tests.
+        return { 8, 16 };
+    }
+
     void SetSystemMode(const Mode mode, const bool enabled)
     {
         Log::Comment(L"SetSystemMode MOCK called...");
