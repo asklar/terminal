@@ -1,11 +1,49 @@
 ---
 author: asklar
 created on: 2026-07-24
-last updated: 2026-07-24
+last updated: 2026-07-25
 issue id: N/A — maintained in fork (github.com/asklar/terminal); see microsoft/terminal#8389 for prior upstream discussion
 ---
 
 # Kitty Graphics Protocol Support
+
+## Implementation status (2026-07-25)
+
+Transmission (`t=d` only), direct placement, Unicode Placeholder placement,
+and deletion are implemented and merged to the `kitty` branch, gated behind
+`experimental.enableKittyGraphicsProtocol` (default off). Highlights and
+deviations from the original design below, for anyone picking this up:
+
+- **Unicode Placeholder rendering** works by decoding placeholder cells
+  (U+10EEEE + row/column/id diacritics + fg/underline color) at paint time
+  and synthesizing each affected row's `ImageSlice` from the referenced
+  image, right before the existing Sixel-derived `PaintImageSlice` call in
+  `Renderer::_PaintBufferOutput` (`src/renderer/base/renderer.cpp`). No
+  renderer-backend (AtlasEngine/GDI) changes were needed. Sub-image
+  sampling is nearest-neighbor, not bilinear -- adequate but a candidate
+  for a follow-up quality pass.
+- The decoded-image store (`KittyImageStorage`) and the placeholder-decode
+  logic (`KittyPlaceholder`, including the 297-entry row/column diacritics
+  table pulled directly from the published `rowcolumn-diacritics.txt`) live
+  in `src/buffer/out/`, attached to `TextBuffer`, since both the VT adapter
+  and the renderer need to reach them.
+- `TextBuffer::Reflow` needed a fix: it builds an entirely new `TextBuffer`
+  per resize and only copied cursor properties, which would have silently
+  discarded the image store (and orphaned any Unicode Placeholder text
+  already in the reflowed rows) on every resize. Fixed by moving the store
+  across explicitly; covered by a regression test.
+- Real fuzzing integration (LibFuzzer/OneFuzz per `doc/fuzzing.md`) is
+  **not** done: the existing conhost-based harness can't reach this code,
+  since Kitty graphics is gated off unconditionally for the classic console
+  (`ConhostInternalGetSet::IsKittyGraphicsProtocolEnabled` returns `false`).
+  As an interim measure, a battery of malformed/adversarial-input tests
+  (`KittyGraphicsProtocolTests::MalformedSequencesFailClosed`) exercises the
+  same fail-closed paths a fuzzer would stress. A dedicated fuzz entry
+  point targeting `KittyGraphicsParser` directly remains open follow-up
+  work and should land before this is considered safe to enable by default
+  in a release build.
+- Out of scope, as planned: relative placements, z-index/layering,
+  animation frames, and the `t=f`/`t=t` file-path transmission media.
 
 ## Abstract
 
